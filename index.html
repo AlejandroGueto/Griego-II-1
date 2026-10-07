@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Griego II - Unidad 1: Sistema Flexivo Nominal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#38bdf8',
+                        secondary: '#818cf8',
+                        accent: '#f472b6',
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(129, 140, 248, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(129, 140, 248, 0.8);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .animate-slide-in { animation: slideInRight 0.5s ease-out forwards; }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        .animate-pop { animation: pop 0.3s ease-in-out; }
+
+        /* Hide elements dynamically */
+        .hidden-view { display: none !important; }
+
+        /* Drag and drop styles */
+        .draggable {
+            cursor: grab;
+            user-select: none;
+        }
+        .draggable:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            min-height: 40px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+        .drop-zone.drag-over {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            transform: scale(1.05);
+        }
+        .drop-zone.filled {
+            border: 2px solid #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .drop-zone.error {
+            border: 2px solid #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Toast container */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 250px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            animation: slideInRight 0.3s ease-out forwards;
+            opacity: 0;
+        }
+        .toast.success { background: linear-gradient(to right, #064e3b, #047857); border-left: 4px solid #10b981; }
+        .toast.error { background: linear-gradient(to right, #7f1d1d, #b91c1c); border-left: 4px solid #ef4444; }
+        .toast.info { background: linear-gradient(to right, #1e3a8a, #1d4ed8); border-left: 4px solid #3b82f6; }
+
+        .greek-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .greek-table th, .greek-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            text-align: left;
+        }
+        .greek-table th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            color: #38bdf8;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+        .greek-table tr:last-child td { border-bottom: none; }
+        .greek-table td:last-child { border-right: none; }
+        .greek-table tbody tr:hover { background: rgba(255,255,255,0.05); }
+        .greek-text { font-family: 'Times New Roman', Times, serif; font-size: 1.25rem; font-style: italic; letter-spacing: 0.02em; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-100">
+
+    <!-- Mobile overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/60 z-30 hidden lg:hidden backdrop-blur-sm" onclick="toggleMobileMenu()"></div>
+
+    <aside id="sidebar" class="glass-panel w-72 h-full flex flex-col transition-transform duration-300 absolute lg:relative z-40 transform -translate-x-full lg:translate-x-0 border-r border-glassBorder">
+        <div class="p-6 border-b border-glassBorder flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Griego II</h1>
+                <p class="text-sm text-gray-400 mt-1">Unidad 1</p>
+            </div>
+            <button class="lg:hidden text-gray-400 hover:text-white" onclick="toggleMobileMenu()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-2 px-4">
+                <li class="nav-label text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-4 pl-3">Teoría</li>
+                <li>
+                    <button onclick="navigate('theory-intro')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors active-nav">
+                        <i class="fas fa-book-open text-primary"></i>
+                        <span>Lengua Flexiva</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navigate('theory-cases')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+                        <i class="fas fa-list-alt text-primary"></i>
+                        <span>Casos y Funciones</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navigate('theory-article')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+                        <i class="fas fa-font text-primary"></i>
+                        <span>El Artículo</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navigate('theory-dec2')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+                        <i class="fas fa-cubes text-primary"></i>
+                        <span>2ª Declinación</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navigate('theory-dec1')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+                        <i class="fas fa-cube text-primary"></i>
+                        <span>1ª Declinación</span>
+                    </button>
+                </li>
+
+                <li class="nav-label text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6 pl-3">Práctica</li>
+                <li>
+                    <button onclick="navigate('quiz-functions')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative">
+                        <i class="fas fa-gamepad text-accent"></i>
+                        <span>Quiz de Funciones</span>
+                        <span id="quiz-badge" class="absolute right-3 bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full hidden"><i class="fas fa-check"></i></span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="navigate('drag-drop-practice')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-gray-300 hover:bg-white/10 hover:text-white transition-colors relative">
+                        <i class="fas fa-puzzle-piece text-accent"></i>
+                        <span>Reto Declinación</span>
+                        <span id="drag-badge" class="absolute right-3 bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full hidden"><i class="fas fa-check"></i></span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="p-4 border-t border-glassBorder bg-black/20">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user-graduate text-white"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold">Nivel <span id="user-level" class="text-primary">1</span></p>
+                    <p class="text-xs text-gray-400">Estudioso del Griego</p>
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-700 rounded-full h-2 mt-3 relative overflow-hidden">
+                <div id="xp-bar" class="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-right mt-1 text-gray-400"><span id="user-xp">0</span> / <span id="xp-next">100</span> XP</p>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="glass-panel px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-glassBorder">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-gray-300 hover:text-white" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 id="view-title" class="text-xl font-semibold tracking-wide">Noción de Lengua Flexiva</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="resetProgress()" class="text-sm text-gray-400 hover:text-red-400 transition-colors tooltip relative group">
+                    <i class="fas fa-undo"></i>
+                    <span class="absolute hidden group-hover:block bg-black/80 text-white text-xs p-2 rounded -bottom-8 right-0 whitespace-nowrap">Reiniciar Progreso</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Container -->
+        <div id="content-container" class="flex-1 overflow-y-auto p-6 md:p-10 pb-24 scroll-smooth">
+            
+            <section id="theory-intro" class="view-section animate-fade-in max-w-4xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl mb-8">
+                    <h3 class="text-2xl font-bold mb-4 text-primary"><i class="fas fa-info-circle mr-2"></i> 1. Noción de Lengua Flexiva</h3>
+                    <p class="text-gray-300 leading-relaxed mb-4 text-lg">
+                        Una lengua es flexiva cuando sus sustantivos y pronombres presentan <strong class="text-white">casos</strong>. Un caso es un sufijo que se añade a la palabra para dotarla de una función específica dentro de la frase.
+                    </p>
+                    
+                    <div class="bg-black/30 p-6 rounded-xl border border-white/10 my-6 shadow-inner">
+                        <p class="mb-2 text-gray-300">Pongamos por ejemplo la raíz <span class="greek-text text-accent text-xl ml-1">ἄνθρωπ-</span> = "hombre":</p>
+                        <ul class="space-y-3 mt-4">
+                            <li class="flex items-start gap-3">
+                                <i class="fas fa-arrow-right text-primary mt-1"></i>
+                                <div>
+                                    <span class="greek-text text-white">ἄνθρωπ-<span class="text-primary font-bold">ος</span></span>
+                                    <span class="text-gray-400 text-sm ml-2">(Nominativo sing.)</span>
+                                    <p class="text-sm text-gray-300 mt-1">Indica que la palabra funciona de sujeto o atributo.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fas fa-arrow-right text-primary mt-1"></i>
+                                <div>
+                                    <span class="greek-text text-white">ἄνθρωπ-<span class="text-accent font-bold">ον</span></span>
+                                    <span class="text-gray-400 text-sm ml-2">(Acusativo sing.)</span>
+                                    <p class="text-sm text-gray-300 mt-1">Indica que la palabra funciona como Complemento Directo (CD).</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <p class="text-gray-300 leading-relaxed">
+                        Al conjunto de casos que puede llevar una palabra en singular y plural se le llama <strong class="text-white">declinación</strong>. En griego hay tres declinaciones.
+                    </p>
+                    <div class="mt-4 p-4 border-l-4 border-secondary bg-secondary/10 rounded-r-lg text-sm text-gray-300">
+                        <i class="fas fa-lightbulb text-secondary mr-2"></i> Así pues, la función que en español hacen las preposiciones, en griego la lleva a cabo principalmente los casos. Según el caso, tendrá una función y traducción determinada.
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-2xl">
+                    <h3 class="text-2xl font-bold mb-4 text-primary"><i class="fas fa-layer-group mr-2"></i> 2. Palabras Declinables e Indeclinables</h3>
+                    <div class="grid md:grid-cols-2 gap-6 mt-6">
+                        <div class="bg-red-900/20 border border-red-500/20 p-5 rounded-xl hover:bg-red-900/30 transition-colors">
+                            <h4 class="font-bold text-red-400 flex items-center gap-2 mb-3"><i class="fas fa-lock"></i> Indeclinables</h4>
+                            <p class="text-sm text-gray-400 mb-2">No presentan flexión (no tienen casos):</p>
+                            <ul class="list-disc pl-5 text-gray-300 text-sm space-y-1">
+                                <li>Preposiciones</li>
+                                <li>Adverbios</li>
+                                <li>Conjunciones</li>
+                                <li>Pronombres-adjetivos numerales (excepto del 1 al 4 y del 200 en adelante)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-900/20 border border-green-500/20 p-5 rounded-xl hover:bg-green-900/30 transition-colors">
+                            <h4 class="font-bold text-green-400 flex items-center gap-2 mb-3"><i class="fas fa-unlock"></i> Declinables</h4>
+                            <p class="text-sm text-gray-400 mb-2">Se declinan por casos, género y número:</p>
+                            <ul class="list-disc pl-5 text-gray-300 text-sm space-y-1">
+                                <li>Artículos</li>
+                                <li>Sustantivos</li>
+                                <li>Pronombres</li>
+                                <li>Adjetivos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="theory-cases" class="view-section hidden-view max-w-5xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl">
+                    <h3 class="text-2xl font-bold mb-4 text-primary"><i class="fas fa-sitemap mr-2"></i> 3. Relación Caso-Función</h3>
+                    <p class="text-gray-300 mb-6 text-lg">El griego consta de 5 casos. Cada uno indica varias funciones sintácticas clave para la traducción:</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="greek-table bg-black/40">
+                            <thead>
+                                <tr>
+                                    <th class="w-1/6">Caso</th>
+                                    <th class="w-2/6">Funciones</th>
+                                    <th class="w-3/6">Traducción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-white bg-white/5">Nominativo</td>
+                                    <td>Sujeto / Atributo (con el verbo "εἰμί") / C. Predicativo del sujeto / Aposición del Sujeto</td>
+                                    <td class="text-gray-400">Como un Sintagma Nominal (sin preposición). <br><em class="text-gray-300">Ej: "El hombre existe."</em></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white bg-white/5">Vocativo</td>
+                                    <td>Apelación / Vocativo</td>
+                                    <td class="text-gray-400">Normalmente va entre comas y precedido por la exclamación ὦ ("oh", no se traduce). <br><em class="text-gray-300">Ej: "Oye, Menelao."</em></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white bg-white/5">Acusativo</td>
+                                    <td>CD / CC (si lleva prep.) / C. Predicativo del CD / Aposición del CD</td>
+                                    <td class="text-gray-400">CD: Sintagma nominal / Con la prep. "A" si es persona. CC: Traducimos la preposición. <br><em class="text-gray-300">Ej: "El hombre cultiva la finca."</em></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white bg-white/5">Genitivo</td>
+                                    <td>CN / CC (si lleva prep.) / C. Régimen / C. Agente</td>
+                                    <td class="text-gray-400">CN: Con la prep. "DE". CC: Traducimos la prep. C. Agente: Con la prep. "POR" (con ὑπό y v. pasivo). <br><em class="text-gray-300">Ej: "El perro del niño ladra."</em></td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-white bg-white/5">Dativo</td>
+                                    <td>CI / CC (si lleva prep.) / C. Régimen</td>
+                                    <td class="text-gray-400">CI: Con la prep. "A / PARA". CC: Traducimos la preposición que aparezca. <br><em class="text-gray-300">Ej: "Dan comida al Minotauro."</em></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-8 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 p-6 rounded-xl border border-blue-500/20">
+                        <h4 class="font-bold text-lg text-white mb-4">Análisis de Ejemplo Clásico:</h4>
+                        <div class="text-center mb-6 py-4 bg-black/40 rounded-lg shadow-inner">
+                            <span class="greek-text text-2xl text-white">ἡ ἡσυχία τίκτει εὐδαιμονίαν τῷ ἀνθρώπῳ.</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-center text-sm">
+                            <div class="bg-white/5 p-2 rounded">
+                                <span class="block font-bold text-primary">ἡ ἡσυχία</span>
+                                <span class="text-gray-400 block text-xs mt-1">Nom. sing. fem.</span>
+                                <span class="text-green-400 font-bold block mt-1">SUJETO</span>
+                            </div>
+                            <div class="bg-white/5 p-2 rounded">
+                                <span class="block font-bold text-primary">τίκτει</span>
+                                <span class="text-gray-400 block text-xs mt-1">vº 3ª p. sing. Pres. Ind. Act.</span>
+                                <span class="text-yellow-400 font-bold block mt-1">NÚCLEO</span>
+                            </div>
+                            <div class="bg-white/5 p-2 rounded">
+                                <span class="block font-bold text-primary">εὐδαιμονίαν</span>
+                                <span class="text-gray-400 block text-xs mt-1">Acus. sing. fem.</span>
+                                <span class="text-red-400 font-bold block mt-1">CD</span>
+                            </div>
+                            <div class="bg-white/5 p-2 rounded">
+                                <span class="block font-bold text-primary">τῷ ἀνθρώπῳ</span>
+                                <span class="text-gray-400 block text-xs mt-1">Dat. sing. masc.</span>
+                                <span class="text-purple-400 font-bold block mt-1">CI</span>
+                            </div>
+                        </div>
+                        <p class="text-center mt-6 text-lg font-medium text-white italic">"La tranquilidad produce felicidad al hombre."</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="theory-article" class="view-section hidden-view max-w-4xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl">
+                    <h3 class="text-2xl font-bold mb-4 text-primary"><i class="fas fa-font mr-2"></i> 4. El Artículo</h3>
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        El artículo ha de concordar en <strong class="text-white">caso, género y número</strong> con el sustantivo que acompaña. 
+                        Si en una frase con el verbo hay dos sustantivos en caso nominativo, aquel que lleve artículo será el sujeto.
+                        Es casi igual a la 1ª y 2ª declinación. Aprende bien los espíritus y acentos.
+                    </p>
+
+                    <div class="overflow-x-auto">
+                        <table class="greek-table text-center bg-black/40">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th colspan="3" class="text-center border-b border-white/10 bg-blue-900/20">Singular</th>
+                                    <th colspan="3" class="text-center border-b border-white/10 bg-indigo-900/20">Plural</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-left">Caso</th>
+                                    <th class="text-center text-blue-300">Masc.</th>
+                                    <th class="text-center text-pink-300">Fem.</th>
+                                    <th class="text-center text-gray-300">Neutro</th>
+                                    <th class="text-center text-blue-300">Masc.</th>
+                                    <th class="text-center text-pink-300">Fem.</th>
+                                    <th class="text-center text-gray-300">Neutro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-left bg-white/5">Nom.</td>
+                                    <td class="greek-text text-xl">ὁ</td>
+                                    <td class="greek-text text-xl">ἡ</td>
+                                    <td class="greek-text text-xl">τό</td>
+                                    <td class="greek-text text-xl">οἱ</td>
+                                    <td class="greek-text text-xl">αἱ</td>
+                                    <td class="greek-text text-xl">τά</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-left bg-white/5">Voc.</td>
+                                    <td class="text-gray-600">-</td>
+                                    <td class="text-gray-600">-</td>
+                                    <td class="text-gray-600">-</td>
+                                    <td class="text-gray-600">-</td>
+                                    <td class="text-gray-600">-</td>
+                                    <td class="text-gray-600">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-left bg-white/5">Acus.</td>
+                                    <td class="greek-text text-xl">τόν</td>
+                                    <td class="greek-text text-xl">τήν</td>
+                                    <td class="greek-text text-xl">τό</td>
+                                    <td class="greek-text text-xl">τούς</td>
+                                    <td class="greek-text text-xl">τάς</td>
+                                    <td class="greek-text text-xl">τά</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-left bg-white/5">Gen.</td>
+                                    <td class="greek-text text-xl">τοῦ</td>
+                                    <td class="greek-text text-xl">τῆς</td>
+                                    <td class="greek-text text-xl">τοῦ</td>
+                                    <td class="greek-text text-xl">τῶν</td>
+                                    <td class="greek-text text-xl">τῶν</td>
+                                    <td class="greek-text text-xl">τῶν</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-left bg-white/5">Dat.</td>
+                                    <td class="greek-text text-xl">τῷ</td>
+                                    <td class="greek-text text-xl">τῇ</td>
+                                    <td class="greek-text text-xl">τῷ</td>
+                                    <td class="greek-text text-xl">τοῖς</td>
+                                    <td class="greek-text text-xl">ταῖς</td>
+                                    <td class="greek-text text-xl">τοῖς</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="theory-dec2" class="view-section hidden-view max-w-5xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl">
+                    <h3 class="text-2xl font-bold mb-4 text-primary"><i class="fas fa-cubes mr-2"></i> 5. La Segunda Declinación</h3>
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        Pertenecen sustantivos masculinos, femeninos y neutros. El neutro se distingue del masc/fem solo en Nom, Voc y Acus (siempre tienen la misma desinencia: <strong>-ον</strong> en singular, <strong>-α</strong> en plural).
+                    </p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Logos -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                            <h4 class="text-center font-bold text-blue-300 mb-2">λόγ-ος, -ου ὁ (palabra)</h4>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Singular</th><th>Plural</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">N/V</td><td class="greek-text">λόγ-ος / λόγ-ε</td><td class="greek-text">λόγ-οι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">λόγ-ον</td><td class="greek-text">λόγ-ους</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">λόγ-ου</td><td class="greek-text">λόγ-ων</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">λόγ-ῳ</td><td class="greek-text">λόγ-οις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Nesos -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                            <h4 class="text-center font-bold text-pink-300 mb-2">νῆσ-ος, -ου ἡ (isla)</h4>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Singular</th><th>Plural</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">N/V</td><td class="greek-text">νῆσ-ος / νῆσ-ε</td><td class="greek-text">νῆσ-οι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">νῆσ-ον</td><td class="greek-text">νῆσ-ους</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">νῆσ-ου</td><td class="greek-text">νήσ-ων</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">νήσ-ῳ</td><td class="greek-text">νήσ-οις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Rhodon -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-white/10">
+                            <h4 class="text-center font-bold text-gray-300 mb-2">ῥόδ-ον, -ου τό (rosa)</h4>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Singular</th><th>Plural</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">N/V</td><td class="greek-text">ῥόδ-ον</td><td class="greek-text">ῥόδ-α</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">ῥόδ-ον</td><td class="greek-text">ῥόδ-α</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">ῥόδ-ου</td><td class="greek-text">ῥόδ-ων</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">ῥόδ-ῳ</td><td class="greek-text">ῥόδ-οις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="theory-dec1" class="view-section hidden-view max-w-5xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl mb-8">
+                    <h3 class="text-2xl font-bold mb-4 text-primary"><i class="fas fa-cube mr-2"></i> 6. La Primera Declinación</h3>
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        Consta de sustantivos femeninos y masculinos. El nominativo plural es <strong>-αι</strong> en todos los tipos, y el genitivo plural es <strong>-ων</strong>.
+                    </p>
+
+                    <h4 class="font-bold text-pink-400 text-lg border-b border-white/10 pb-2 mb-4">Temas Femeninos</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- a pura -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-pink-500/20">
+                            <h5 class="text-center font-bold text-pink-200 mb-1">Tema -α pura</h5>
+                            <p class="text-center text-xs text-gray-400 mb-2">ἡμέρα, -ας ἡ (día)</p>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Sing.</th><th>Plur.</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">N/V</td><td class="greek-text">ἡμέρ-α</td><td class="greek-text">ἡμέρ-αι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">ἡμέρ-αν</td><td class="greek-text">ἡμέρ-ας</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">ἡμέρ-ας</td><td class="greek-text">ἡμερ-ῶν</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">ἡμέρ-ᾳ</td><td class="greek-text">ἡμέρ-αις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- a mixta -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-pink-500/20">
+                            <h5 class="text-center font-bold text-pink-200 mb-1">Tema -α mixta</h5>
+                            <p class="text-center text-xs text-gray-400 mb-2">δόξα, -ης ἡ (opinión)</p>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Sing.</th><th>Plur.</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">N/V</td><td class="greek-text">δόξ-α</td><td class="greek-text">δόξ-αι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">δόξ-αν</td><td class="greek-text">δόξ-ας</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">δόξ-ης</td><td class="greek-text">δοξ-ῶν</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">δόξ-ῃ</td><td class="greek-text">δόξ-αις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- n -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-pink-500/20">
+                            <h5 class="text-center font-bold text-pink-200 mb-1">Tema -η</h5>
+                            <p class="text-center text-xs text-gray-400 mb-2">εἰρήνη, -ης ἡ (paz)</p>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Sing.</th><th>Plur.</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">N/V</td><td class="greek-text">εἰρήν-η</td><td class="greek-text">εἰρήν-αι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">εἰρήν-ην</td><td class="greek-text">εἰρήν-ας</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">εἰρήν-ης</td><td class="greek-text">εἰρην-ῶν</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">εἰρήν-ῃ</td><td class="greek-text">εἰρήν-αις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h4 class="font-bold text-blue-400 text-lg border-b border-white/10 pb-2 mb-4">Temas Masculinos (Análogos a 2ª dec en gen. sing.)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:w-2/3 mx-auto">
+                        <!-- as -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-blue-500/20">
+                            <h5 class="text-center font-bold text-blue-200 mb-1">Tema -ας</h5>
+                            <p class="text-center text-xs text-gray-400 mb-2">νεανίας, -ου ὁ (joven)</p>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Singular</th><th>Plural</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">Nom</td><td class="greek-text">νεανί-ας</td><td class="greek-text">νεανί-αι</td></tr>
+                                    <tr><td class="bg-white/5">Voc</td><td class="greek-text">νεανί-α</td><td class="greek-text">νεανί-αι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">νεανί-αν</td><td class="greek-text">νεανί-ας</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">νεανί-ου</td><td class="greek-text">νεανι-ῶν</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">νεανί-ᾳ</td><td class="greek-text">νεανί-αις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- es -->
+                        <div class="bg-black/30 rounded-xl p-4 border border-blue-500/20">
+                            <h5 class="text-center font-bold text-blue-200 mb-1">Tema -ης</h5>
+                            <p class="text-center text-xs text-gray-400 mb-2">πολίτης, -ου ὁ (ciudadano)</p>
+                            <table class="greek-table mt-0 bg-transparent text-sm">
+                                <thead>
+                                    <tr><th>Caso</th><th>Singular</th><th>Plural</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="bg-white/5">Nom</td><td class="greek-text">πολίτ-ης</td><td class="greek-text">πολίτ-αι</td></tr>
+                                    <tr><td class="bg-white/5">Voc</td><td class="greek-text">πολίτ-α</td><td class="greek-text">πολίτ-αι</td></tr>
+                                    <tr><td class="bg-white/5">Acus</td><td class="greek-text">πολίτ-ην</td><td class="greek-text">πολίτ-ας</td></tr>
+                                    <tr><td class="bg-white/5">Gen</td><td class="greek-text">πολίτ-ου</td><td class="greek-text">πολιτ-ῶν</td></tr>
+                                    <tr><td class="bg-white/5">Dat</td><td class="greek-text">πολίτ-ῃ</td><td class="greek-text">πολίτ-αις</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="quiz-functions" class="view-section hidden-view max-w-3xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl flex flex-col min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-accent"><i class="fas fa-gamepad mr-2"></i> Quiz: Casos y Funciones</h3>
+                        <div class="bg-black/30 px-4 py-2 rounded-full font-mono text-sm border border-white/10">
+                            Pregunta <span id="quiz-current">1</span> / <span id="quiz-total">10</span>
+                        </div>
+                    </div>
+
+                    <!-- Intro Screen -->
+                    <div id="quiz-intro" class="flex-1 flex flex-col justify-center items-center text-center animate-fade-in">
+                        <i class="fas fa-brain text-6xl text-primary mb-6 animate-pulse"></i>
+                        <h4 class="text-xl font-semibold mb-3">Demuestra tu conocimiento</h4>
+                        <p class="text-gray-400 mb-8 max-w-md">Responde correctamente a las preguntas sobre funciones sintácticas, traducciones y declinaciones para ganar XP.</p>
+                        <button onclick="startQuiz()" class="glass-button bg-primary/20 hover:bg-primary/40 text-primary font-bold py-3 px-8 rounded-full text-lg shadow-[0_0_15px_rgba(56,189,248,0.4)]">
+                            ¡Comenzar Reto!
+                        </button>
+                    </div>
+
+                    <!-- Question Screen -->
+                    <div id="quiz-question-container" class="hidden flex-1 flex flex-col">
+                        <div class="w-full bg-gray-800 rounded-full h-1 mb-8">
+                            <div id="quiz-progress" class="bg-accent h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <h4 id="question-text" class="text-xl font-medium mb-8 text-white leading-relaxed">¿Pregunta?</h4>
+                        <div id="options-container" class="grid gap-4 mt-auto">
+                            <!-- Options injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Result Screen -->
+                    <div id="quiz-result" class="hidden flex-1 flex flex-col justify-center items-center text-center">
+                        <i class="fas fa-trophy text-6xl text-yellow-400 mb-6 animate-pop"></i>
+                        <h4 class="text-2xl font-bold mb-2">¡Quiz Completado!</h4>
+                        <p class="text-lg text-gray-300 mb-2">Puntuación: <span id="quiz-score" class="font-bold text-white">0</span>/10</p>
+                        <p class="text-accent mb-8 font-semibold">+<span id="quiz-xp-earned">0</span> XP Obtenidos</p>
+                        <button onclick="navigate('drag-drop-practice')" class="glass-button bg-accent/20 hover:bg-accent/40 text-accent font-bold py-3 px-8 rounded-full">
+                            Ir al siguiente reto <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <button onclick="resetQuiz()" class="text-sm text-gray-400 hover:text-white mt-4 underline">Volver a intentar</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="drag-drop-practice" class="view-section hidden-view max-w-5xl mx-auto">
+                <div class="glass-panel p-8 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                        <h3 class="text-2xl font-bold text-accent"><i class="fas fa-puzzle-piece mr-2"></i> Reto: Construye la Declinación</h3>
+                        <select id="dd-selector" onchange="loadDragDropLevel(this.value)" class="bg-black/50 border border-white/20 text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 outline-none">
+                            <option value="art_masc">Artículo Masculino (ὁ...)</option>
+                            <option value="art_fem">Artículo Femenino (ἡ...)</option>
+                            <option value="art_neut">Artículo Neutro (τό...)</option>
+                            <option value="logos">2ª Dec Masc: λόγος</option>
+                            <option value="nesos">2ª Dec Fem: νῆσος</option>
+                            <option value="rhodon">2ª Dec Neutro: ῥόδον</option>
+                            <option value="hemera">1ª Dec Fem (-α pura): ἡμέρα</option>
+                            <option value="doxa">1ª Dec Fem (-α mixta): δόξα</option>
+                            <option value="eirene">1ª Dec Fem (-η): εἰρήνη</option>
+                            <option value="neanias">1ª Dec Masc (-ας): νεανίας</option>
+                            <option value="polites">1ª Dec Masc (-ης): πολίτης</option>
+                        </select>
+                    </div>
+
+                    <p class="text-gray-300 mb-6 text-sm">Arrastra las desinencias o formas completas a su casilla correspondiente. Gana XP por cada acierto.</p>
+
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <!-- Table Zone -->
+                        <div class="flex-1 bg-black/40 rounded-xl p-4 border border-white/10 relative">
+                            <div id="dd-success-overlay" class="absolute inset-0 bg-green-900/80 backdrop-blur-sm z-10 hidden flex-col justify-center items-center rounded-xl animate-fade-in">
+                                <i class="fas fa-check-circle text-5xl text-green-400 mb-4 animate-pop"></i>
+                                <h4 class="text-2xl font-bold text-white mb-2">¡Tabla Completada!</h4>
+                                <p class="text-green-200">+50 XP bonus</p>
+                                <button onclick="nextDragDropLevel()" class="mt-6 px-6 py-2 bg-green-500 hover:bg-green-400 text-black font-bold rounded-full transition-colors">Siguiente Nivel</button>
+                            </div>
+                            
+                            <table class="greek-table mt-0 w-full">
+                                <thead id="dd-thead">
+                                    <!-- Dynamic header -->
+                                </thead>
+                                <tbody id="dd-tbody">
+                                    <!-- Dynamic rows with drop zones -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Bank Zone -->
+                        <div class="w-full lg:w-1/3 bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col h-fit">
+                            <h4 class="font-semibold text-center mb-4 text-gray-400 border-b border-white/10 pb-2">Banco de Respuestas</h4>
+                            <div id="draggable-bank" class="flex flex-wrap gap-3 justify-center min-h-[150px] p-2">
+                                <!-- Draggable items injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            xp: 0,
+            level: 1,
+            xpNext: 100,
+            achievements: {
+                quizCompleted: false,
+                dragDropCompleted: false
+            }
+        };
+
+        // Load state from local storage if exists
+        function loadState() {
+            const saved = localStorage.getItem('griegoProgreso');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.xp = parsed.xp || 0;
+                state.level = parsed.level || 1;
+                state.xpNext = parsed.xpNext || 100;
+                state.achievements = parsed.achievements || { quizCompleted: false, dragDropCompleted: false };
+                updateUI();
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('griegoProgreso', JSON.stringify(state));
+            updateUI();
+        }
+
+        function addXP(amount) {
+            state.xp += amount;
+            if (state.xp >= state.xpNext) {
+                state.xp -= state.xpNext;
+                state.level++;
+                state.xpNext = Math.floor(state.xpNext * 1.5);
+                showToast(`¡Nivel ${state.level} alcanzado!`, 'success');
+                // Play level up sound/animation logic could go here
+            }
+            saveState();
+        }
+
+        function resetProgress() {
+            if(confirm("¿Estás seguro de que quieres borrar todo tu progreso y volver al Nivel 1?")) {
+                localStorage.removeItem('griegoProgreso');
+                state.xp = 0;
+                state.level = 1;
+                state.xpNext = 100;
+                state.achievements = { quizCompleted: false, dragDropCompleted: false };
+                updateUI();
+                showToast('Progreso reiniciado', 'info');
+                document.getElementById('quiz-badge').classList.add('hidden');
+                document.getElementById('drag-badge').classList.add('hidden');
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('user-xp').textContent = state.xp;
+            document.getElementById('xp-next').textContent = state.xpNext;
+            document.getElementById('user-level').textContent = state.level;
+            
+            const percent = Math.min(100, Math.max(0, (state.xp / state.xpNext) * 100));
+            document.getElementById('xp-bar').style.width = percent + '%';
+
+            if(state.achievements.quizCompleted) document.getElementById('quiz-badge').classList.remove('hidden');
+            if(state.achievements.dragDropCompleted) document.getElementById('drag-badge').classList.remove('hidden');
+        }
+
+        // --- Navigation System ---
+        const viewTitles = {
+            'theory-intro': 'Noción de Lengua Flexiva',
+            'theory-cases': 'Casos y Funciones',
+            'theory-article': 'El Artículo',
+            'theory-dec2': '2ª Declinación',
+            'theory-dec1': '1ª Declinación',
+            'quiz-functions': 'Práctica: Quiz de Funciones',
+            'drag-drop-practice': 'Práctica: Declinaciones'
+        };
+
+        function navigate(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden-view');
+                el.classList.remove('animate-fade-in');
+            });
+            
+            // Remove active state from nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-nav', 'bg-white/10', 'text-white');
+                btn.classList.add('text-gray-300');
+            });
+
+            // Show selected view
+            const selectedView = document.getElementById(viewId);
+            if (selectedView) {
+                selectedView.classList.remove('hidden-view');
+                // Trigger reflow for animation
+                void selectedView.offsetWidth;
+                selectedView.classList.add('animate-fade-in');
+            }
+
+            // Update Header Title
+            document.getElementById('view-title').textContent = viewTitles[viewId] || 'Griego II';
+
+            // Set active state on clicked nav button (finding by onclick attribute string matching)
+            const activeBtn = document.querySelector(`button[onclick="navigate('${viewId}')"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active-nav', 'bg-white/10', 'text-white');
+                activeBtn.classList.remove('text-gray-300');
+            }
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                toggleMobileMenu();
+            }
+
+            // Specific view inits
+            if(viewId === 'drag-drop-practice' && !ddInitialized) {
+                loadDragDropLevel('art_masc');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // --- Toast System ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'fa-info-circle';
+            if(type === 'success') icon = 'fa-check-circle text-green-300';
+            if(type === 'error') icon = 'fa-exclamation-circle text-red-300';
+
+            toast.innerHTML = `
+                <i class="fas ${icon} text-xl"></i>
+                <span class="font-medium text-sm text-white">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => {
+                    if (container.contains(toast)) container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        const quizData = [
+            { q: "¿Qué indica principalmente el Acusativo?", options: ["Sujeto", "Complemento Directo", "Complemento Indirecto", "Vocativo"], answer: 1 },
+            { q: "La función de Complemento del Nombre (precedido por 'de') corresponde al caso:", options: ["Nominativo", "Dativo", "Genitivo", "Acusativo"], answer: 2 },
+            { q: "En la frase 'El hombre existe', ¿en qué caso va 'El hombre'?", options: ["Nominativo", "Acusativo", "Dativo", "Genitivo"], answer: 0 },
+            { q: "¿Qué preposiciones se usan normalmente para traducir el Dativo sin preposición?", options: ["de / desde", "por / para", "a / para", "con / en"], answer: 2 },
+            { q: "¿Qué significa que una lengua sea 'flexiva'?", options: ["Que usa muchas preposiciones", "Que las palabras tienen casos (sufijos) que indican su función", "Que el orden de palabras es rígido", "Que no tiene artículos"], answer: 1 },
+            { q: "Según la 1ª y 2ª declinación, el artículo nominativo singular masculino es:", options: ["τό", "ἡ", "τοῦ", "ὁ"], answer: 3 },
+            { q: "Si en una oración griega con el verbo εἰμί (ser) hay dos nominativos, ¿cómo identificamos el sujeto?", options: ["Es siempre el primero", "Es el que lleva artículo", "Es el que va al final", "Ninguno, ambos son atributos"], answer: 1 },
+            { q: "¿Cuáles de estas palabras son INDECLINABLES?", options: ["Adjetivos y Artículos", "Sustantivos y Pronombres", "Preposiciones y Conjunciones", "Numerales 1 al 4"], answer: 2 },
+            { q: "¿Cuál es la desinencia del acusativo singular neutro de la 2ª declinación (ej. ῥόδον)?", options: ["-ος", "-ον", "-ου", "-ῳ"], answer: 1 },
+            { q: "Los temas en -α pura de la 1ª declinación (como ἡμέρα) hacen su genitivo singular en:", options: ["-ης", "-ου", "-ας", "-ων"], answer: 2 },
+            { q: "El caso que se utiliza principalmente para invocar o llamar la atención es el:", options: ["Acusativo", "Nominativo", "Vocativo", "Dativo"], answer: 2 },
+            { q: "¿Qué función cumple el Genitivo precedido de la preposición ὑπό con un verbo en pasiva?", options: ["Complemento del Nombre", "Complemento Agente", "Complemento Directo", "Complemento de Régimen"], answer: 1 },
+            { q: "El artículo neutro plural en Nominativo y Acusativo es:", options: ["οἱ", "αἱ", "τά", "τούς"], answer: 2 },
+            { q: "¿A qué declinación pertenece la palabra νῆσος (isla)?", options: ["1ª Declinación Femenina", "2ª Declinación Masculina", "2ª Declinación Femenina", "1ª Declinación Masculina"], answer: 2 },
+            { q: "En la 2ª declinación, las palabras neutras como ῥόδον tienen la misma forma en los casos:", options: ["Nominativo, Acusativo y Genitivo", "Nominativo, Vocativo y Acusativo", "Genitivo y Dativo", "Nominativo y Vocativo únicamente"], answer: 1 },
+            { q: "Las palabras de la 1ª declinación terminadas en -α mixta (como δόξα) cambian la -α por -η en los casos:", options: ["Nominativo y Vocativo", "Acusativo y Dativo", "Genitivo y Dativo del singular", "En todo el plural"], answer: 2 },
+            { q: "El Nominativo plural de TODOS los tipos de la 1ª declinación termina siempre en:", options: ["-οι", "-αι", "-ας", "-ων"], answer: 1 },
+            { q: "El Genitivo plural de la 1ª declinación termina en:", options: ["-ων", "-ου", "-οις", "-αις"], answer: 0 },
+            { q: "¿Cómo se diferencian los sustantivos masculinos de la 1ª declinación (ej. πολίτης)?", options: ["Tienen el Genitivo singular en -ου", "Su nominativo plural acaba en -οι", "Se declinan exactamente igual que los de la 2ª", "No tienen vocativo"], answer: 0 },
+            { q: "¿Qué artículo corresponde a la palabra ἡμέρα en Dativo Singular (ἡμέρᾳ)?", options: ["τῆς", "τήν", "τῇ", "τῷ"], answer: 2 },
+            { q: "Identifica la forma 'τῶν λόγων':", options: ["Nominativo Plural", "Acusativo Singular", "Genitivo Plural", "Dativo Plural"], answer: 2 },
+            { q: "La partícula exclamativa ὦ suele acompañar al caso:", options: ["Nominativo", "Vocativo", "Acusativo", "Genitivo"], answer: 1 },
+            { q: "En la oración 'ἡ ἡσυχία τίκτει εὐδαιμονίαν τῷ ἀνθρώπῳ', la palabra 'εὐδαιμονίαν' funciona de:", options: ["Sujeto", "Complemento Directo (CD)", "Complemento Indirecto (CI)", "Complemento del Nombre (CN)"], answer: 1 },
+            { q: "¿Qué caso y número es 'τοὺς λόγους'?", options: ["Nominativo Plural", "Acusativo Singular", "Acusativo Plural", "Genitivo Plural"], answer: 2 },
+            { q: "¿Cuál es el Dativo Plural del artículo masculino?", options: ["ταῖς", "τοῖς", "τῶν", "τούς"], answer: 1 },
+            { q: "El acusativo singular de la palabra εἰρήνη (1ª dec) es:", options: ["εἰρήνης", "εἰρήνῃ", "εἰρήνην", "εἰρήνας"], answer: 2 },
+            { q: "El nominativo plural de la palabra νεανίας (joven) es:", options: ["νεανίαι", "νεανίοι", "νεανίας", "νεανιῶν"], answer: 0 },
+            { q: "¿Qué género tienen los sustantivos de la 1ª declinación terminados en -ας o -ης?", options: ["Femenino", "Neutro", "Masculino", "Depende del artículo"], answer: 2 },
+            { q: "La desinencia -οις indica principalmente:", options: ["Acusativo Plural 2ª Dec", "Dativo Plural 2ª Dec", "Genitivo Singular 1ª Dec", "Dativo Singular 2ª Dec"], answer: 1 },
+            { q: "Si encuentras una palabra acabada en -ων, lo más probable es que sea un:", options: ["Nominativo Singular", "Genitivo Plural", "Acusativo Plural", "Dativo Singular"], answer: 1 }
+        ];
+
+        let currentQIndex = 0;
+        let score = 0;
+        let currentQuizXP = 0;
+
+        function startQuiz() {
+            currentQIndex = 0;
+            score = 0;
+            currentQuizXP = 0;
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-question-container').classList.remove('hidden');
+            document.getElementById('quiz-question-container').classList.add('animate-fade-in');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = quizData[currentQIndex];
+            document.getElementById('quiz-current').textContent = currentQIndex + 1;
+            document.getElementById('quiz-total').textContent = quizData.length;
+            document.getElementById('question-text').textContent = q.q;
+            
+            const progress = (currentQIndex / quizData.length) * 100;
+            document.getElementById('quiz-progress').style.width = progress + '%';
+
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'glass-button w-full text-left p-4 rounded-xl text-gray-200 font-medium hover:text-white transition-all transform hover:scale-[1.01]';
+                btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-white/10 text-center leading-8 mr-3 text-sm">${String.fromCharCode(65 + index)}</span> ${opt}`;
+                btn.onclick = () => checkAnswer(index, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            // Disable all buttons immediately
+            const allBtns = document.getElementById('options-container').querySelectorAll('button');
+            allBtns.forEach(b => b.onclick = null);
+
+            const correctIndex = quizData[currentQIndex].answer;
+            
+            if (selectedIndex === correctIndex) {
+                btnElement.classList.remove('bg-white/5');
+                btnElement.classList.add('bg-green-600/40', 'border-green-500/50');
+                showToast('¡Correcto! +10 XP', 'success');
+                addXP(10);
+                currentQuizXP += 10;
+                score++;
+            } else {
+                btnElement.classList.remove('bg-white/5');
+                btnElement.classList.add('bg-red-600/40', 'border-red-500/50', 'animate-shake');
+                
+                // Highlight correct
+                allBtns[correctIndex].classList.remove('bg-white/5');
+                allBtns[correctIndex].classList.add('bg-green-600/40', 'border-green-500/50');
+                showToast('Incorrecto', 'error');
+            }
+
+            setTimeout(() => {
+                currentQIndex++;
+                if (currentQIndex < quizData.length) {
+                    const container = document.getElementById('quiz-question-container');
+                    container.classList.remove('animate-fade-in');
+                    void container.offsetWidth; // trigger reflow
+                    container.classList.add('animate-fade-in');
+                    loadQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 1500);
+        }
+
+        function finishQuiz() {
+            document.getElementById('quiz-question-container').classList.add('hidden');
+            const res = document.getElementById('quiz-result');
+            res.classList.remove('hidden');
+            res.classList.add('animate-fade-in');
+            
+            document.getElementById('quiz-score').textContent = score;
+            document.getElementById('quiz-xp-earned').textContent = currentQuizXP;
+
+            if (score > quizData.length / 2 && !state.achievements.quizCompleted) {
+                state.achievements.quizCompleted = true;
+                addXP(50); // Bonus
+                showToast('¡Reto Quiz Completado! +50 XP Extra', 'success');
+                saveState();
+            }
+        }
+
+        function resetQuiz() {
+            startQuiz();
+        }
+
+        const ddDatasets = {
+            art_masc: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'am_ns', val:'ὁ'}, {id:'am_np', val:'οἱ'}] },
+                    { label: 'Acus', cells: [{id:'am_as', val:'τόν'}, {id:'am_ap', val:'τούς'}] },
+                    { label: 'Gen', cells: [{id:'am_gs', val:'τοῦ'}, {id:'am_gp', val:'τῶν'}] },
+                    { label: 'Dat', cells: [{id:'am_ds', val:'τῷ'}, {id:'am_dp', val:'τοῖς'}] }
+                ],
+                bank: ['ὁ', 'οἱ', 'τόν', 'τούς', 'τοῦ', 'τῶν', 'τῷ', 'τοῖς']
+            },
+            art_fem: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'af_ns', val:'ἡ'}, {id:'af_np', val:'αἱ'}] },
+                    { label: 'Acus', cells: [{id:'af_as', val:'τήν'}, {id:'af_ap', val:'τάς'}] },
+                    { label: 'Gen', cells: [{id:'af_gs', val:'τῆς'}, {id:'af_gp', val:'τῶν'}] },
+                    { label: 'Dat', cells: [{id:'af_ds', val:'τῇ'}, {id:'af_dp', val:'ταῖς'}] }
+                ],
+                bank: ['ἡ', 'αἱ', 'τήν', 'τάς', 'τῆς', 'τῶν', 'τῇ', 'ταῖς']
+            },
+            art_neut: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'an_ns', val:'τό'}, {id:'an_np', val:'τά'}] },
+                    { label: 'Acus', cells: [{id:'an_as', val:'τό'}, {id:'an_ap', val:'τά'}] },
+                    { label: 'Gen', cells: [{id:'an_gs', val:'τοῦ'}, {id:'an_gp', val:'τῶν'}] },
+                    { label: 'Dat', cells: [{id:'an_ds', val:'τῷ'}, {id:'an_dp', val:'τοῖς'}] }
+                ],
+                bank: ['τό', 'τά', 'τό', 'τά', 'τοῦ', 'τῶν', 'τῷ', 'τοῖς']
+            },
+            logos: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'l_ns', val:'λόγος'}, {id:'l_np', val:'λόγοι'}] },
+                    { label: 'Voc', cells: [{id:'l_vs', val:'λόγε'}, {id:'l_vp', val:'λόγοι'}] },
+                    { label: 'Acus', cells: [{id:'l_as', val:'λόγον'}, {id:'l_ap', val:'λόγους'}] },
+                    { label: 'Gen', cells: [{id:'l_gs', val:'λόγου'}, {id:'l_gp', val:'λόγων'}] },
+                    { label: 'Dat', cells: [{id:'l_ds', val:'λόγῳ'}, {id:'l_dp', val:'λόγοις'}] }
+                ],
+                bank: ['λόγος', 'λόγοι', 'λόγε', 'λόγοι', 'λόγον', 'λόγους', 'λόγου', 'λόγων', 'λόγῳ', 'λόγοις']
+            },
+            nesos: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'n_ns', val:'νῆσος'}, {id:'n_np', val:'νῆσοι'}] },
+                    { label: 'Voc', cells: [{id:'n_vs', val:'νῆσε'}, {id:'n_vp', val:'νῆσοι'}] },
+                    { label: 'Acus', cells: [{id:'n_as', val:'νῆσον'}, {id:'n_ap', val:'νήσους'}] },
+                    { label: 'Gen', cells: [{id:'n_gs', val:'νήσου'}, {id:'n_gp', val:'νήσων'}] },
+                    { label: 'Dat', cells: [{id:'n_ds', val:'νήσῳ'}, {id:'n_dp', val:'νήσοις'}] }
+                ],
+                bank: ['νῆσος', 'νῆσοι', 'νῆσε', 'νῆσοι', 'νῆσον', 'νήσους', 'νήσου', 'νήσων', 'νήσῳ', 'νήσοις']
+            },
+            rhodon: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'r_ns', val:'ῥόδον'}, {id:'r_np', val:'ῥόδα'}] },
+                    { label: 'Voc', cells: [{id:'r_vs', val:'ῥόδον'}, {id:'r_vp', val:'ῥόδα'}] },
+                    { label: 'Acus', cells: [{id:'r_as', val:'ῥόδον'}, {id:'r_ap', val:'ῥόδα'}] },
+                    { label: 'Gen', cells: [{id:'r_gs', val:'ῥόδου'}, {id:'r_gp', val:'ῥόδων'}] },
+                    { label: 'Dat', cells: [{id:'r_ds', val:'ῥόδῳ'}, {id:'r_dp', val:'ῥόδοις'}] }
+                ],
+                bank: ['ῥόδον', 'ῥόδα', 'ῥόδον', 'ῥόδα', 'ῥόδον', 'ῥόδα', 'ῥόδου', 'ῥόδων', 'ῥόδῳ', 'ῥόδοις']
+            },
+            hemera: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'h_ns', val:'ἡμέρα'}, {id:'h_np', val:'ἡμέραι'}] },
+                    { label: 'Voc', cells: [{id:'h_vs', val:'ἡμέρα'}, {id:'h_vp', val:'ἡμέραι'}] },
+                    { label: 'Acus', cells: [{id:'h_as', val:'ἡμέραν'}, {id:'h_ap', val:'ἡμέρας'}] },
+                    { label: 'Gen', cells: [{id:'h_gs', val:'ἡμέρας'}, {id:'h_gp', val:'ἡμερῶν'}] },
+                    { label: 'Dat', cells: [{id:'h_ds', val:'ἡμέρᾳ'}, {id:'h_dp', val:'ἡμέραις'}] }
+                ],
+                bank: ['ἡμέρα', 'ἡμέραι', 'ἡμέρα', 'ἡμέραι', 'ἡμέραν', 'ἡμέρας', 'ἡμέρας', 'ἡμερῶν', 'ἡμέρᾳ', 'ἡμέραις']
+            },
+            doxa: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'d_ns', val:'δόξα'}, {id:'d_np', val:'δόξαι'}] },
+                    { label: 'Voc', cells: [{id:'d_vs', val:'δόξα'}, {id:'d_vp', val:'δόξαι'}] },
+                    { label: 'Acus', cells: [{id:'d_as', val:'δόξαν'}, {id:'d_ap', val:'δόξας'}] },
+                    { label: 'Gen', cells: [{id:'d_gs', val:'δόξης'}, {id:'d_gp', val:'δοξῶν'}] },
+                    { label: 'Dat', cells: [{id:'d_ds', val:'δόξῃ'}, {id:'d_dp', val:'δόξαις'}] }
+                ],
+                bank: ['δόξα', 'δόξαι', 'δόξα', 'δόξαι', 'δόξαν', 'δόξας', 'δόξης', 'δοξῶν', 'δόξῃ', 'δόξαις']
+            },
+            eirene: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'e_ns', val:'εἰρήνη'}, {id:'e_np', val:'εἰρήναι'}] },
+                    { label: 'Voc', cells: [{id:'e_vs', val:'εἰρήνη'}, {id:'e_vp', val:'εἰρήναι'}] },
+                    { label: 'Acus', cells: [{id:'e_as', val:'εἰρήνην'}, {id:'e_ap', val:'εἰρήνας'}] },
+                    { label: 'Gen', cells: [{id:'e_gs', val:'εἰρήνης'}, {id:'e_gp', val:'εἰρηνῶν'}] },
+                    { label: 'Dat', cells: [{id:'e_ds', val:'εἰρήνῃ'}, {id:'e_dp', val:'εἰρήναις'}] }
+                ],
+                bank: ['εἰρήνη', 'εἰρήναι', 'εἰρήνη', 'εἰρήναι', 'εἰρήνην', 'εἰρήνας', 'εἰρήνης', 'εἰρηνῶν', 'εἰρήνῃ', 'εἰρήναις']
+            },
+            neanias: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'nea_ns', val:'νεανίας'}, {id:'nea_np', val:'νεανίαι'}] },
+                    { label: 'Voc', cells: [{id:'nea_vs', val:'νεανία'}, {id:'nea_vp', val:'νεανίαι'}] },
+                    { label: 'Acus', cells: [{id:'nea_as', val:'νεανίαν'}, {id:'nea_ap', val:'νεανίας'}] },
+                    { label: 'Gen', cells: [{id:'nea_gs', val:'νεανίου'}, {id:'nea_gp', val:'νεανιῶν'}] },
+                    { label: 'Dat', cells: [{id:'nea_ds', val:'νεανίᾳ'}, {id:'nea_dp', val:'νεανίαις'}] }
+                ],
+                bank: ['νεανίας', 'νεανίαι', 'νεανία', 'νεανίαι', 'νεανίαν', 'νεανίας', 'νεανίου', 'νεανιῶν', 'νεανίᾳ', 'νεανίαις']
+            },
+            polites: {
+                headers: ['Caso', 'Singular', 'Plural'],
+                rows: [
+                    { label: 'Nom', cells: [{id:'p_ns', val:'πολίτης'}, {id:'p_np', val:'πολῖται'}] },
+                    { label: 'Voc', cells: [{id:'p_vs', val:'πολῖτα'}, {id:'p_vp', val:'πολῖται'}] },
+                    { label: 'Acus', cells: [{id:'p_as', val:'πολίτην'}, {id:'p_ap', val:'πολίτας'}] },
+                    { label: 'Gen', cells: [{id:'p_gs', val:'πολίτου'}, {id:'p_gp', val:'πολιτῶν'}] },
+                    { label: 'Dat', cells: [{id:'p_ds', val:'πολίτῃ'}, {id:'p_dp', val:'πολίταις'}] }
+                ],
+                bank: ['πολίτης', 'πολῖται', 'πολῖτα', 'πολῖται', 'πολίτην', 'πολίτας', 'πολίτου', 'πολιτῶν', 'πολίτῃ', 'πολίταις']
+            }
+        };
+
+        let currentDDLevel = 'art_masc';
+        let ddInitialized = false;
+        let totalSlots = 0;
+        let filledSlots = 0;
+        let draggedItem = null;
+
+        function loadDragDropLevel(levelId) {
+            currentDDLevel = levelId;
+            ddInitialized = true;
+            document.getElementById('dd-success-overlay').classList.add('hidden');
+            
+            const data = ddDatasets[levelId];
+            totalSlots = 0;
+            filledSlots = 0;
+
+            // Build Header
+            const thead = document.getElementById('dd-thead');
+            thead.innerHTML = '<tr>' + data.headers.map((h, i) => `<th class="${i===0?'w-24':''}">${h}</th>`).join('') + '</tr>';
+
+            // Build Rows & Drop Zones
+            const tbody = document.getElementById('dd-tbody');
+            tbody.innerHTML = '';
+            data.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                let html = `<td class="font-bold bg-white/5">${row.label}</td>`;
+                row.cells.forEach(cell => {
+                    html += `
+                        <td class="p-2">
+                            <div class="drop-zone rounded-lg flex items-center justify-center greek-text text-xl bg-black/50 w-full h-12 shadow-inner" 
+                                 data-answer="${cell.val}" id="${cell.id}">
+                            </div>
+                        </td>
+                    `;
+                    totalSlots++;
+                });
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+
+            // Build Draggable Bank (shuffled)
+            const bank = document.getElementById('draggable-bank');
+            bank.innerHTML = '';
+            const shuffledBank = [...data.bank].sort(() => Math.random() - 0.5);
+            
+            shuffledBank.forEach((itemVal, idx) => {
+                const el = document.createElement('div');
+                el.className = 'draggable bg-gradient-to-br from-indigo-600 to-purple-700 text-white greek-text text-xl px-4 py-2 rounded-lg shadow-lg border border-white/20 hover:scale-105 transition-transform';
+                el.textContent = itemVal;
+                el.draggable = true;
+                el.dataset.value = itemVal;
+                el.id = 'drag-' + idx;
+                
+                // Drag Events
+                el.addEventListener('dragstart', handleDragStart);
+                el.addEventListener('dragend', handleDragEnd);
+                
+                bank.appendChild(el);
+            });
+
+            setupDropZones();
+        }
+
+        function handleDragStart(e) {
+            draggedItem = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.value);
+            setTimeout(() => this.classList.add('opacity-50'), 0);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('opacity-50');
+            draggedItem = null;
+        }
+
+        function setupDropZones() {
+            const zones = document.querySelectorAll('.drop-zone');
+            zones.forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault(); // Necessary to allow dropping
+                    if (!zone.classList.contains('filled')) {
+                        zone.classList.add('drag-over');
+                    }
+                });
+                
+                zone.addEventListener('dragleave', e => {
+                    zone.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            if (this.classList.contains('filled')) return;
+
+            const answer = this.dataset.answer;
+            const droppedVal = e.dataTransfer.getData('text/plain');
+
+            if (answer === droppedVal) {
+                // Correct match
+                this.textContent = droppedVal;
+                this.classList.add('filled', 'text-white');
+                
+                // Visual feedback pop
+                this.style.animation = "pop 0.3s ease-in-out";
+                setTimeout(() => this.style.animation = "", 300);
+
+                // Remove from bank
+                if (draggedItem && draggedItem.parentNode) {
+                    draggedItem.parentNode.removeChild(draggedItem);
+                }
+                
+                addXP(5);
+                filledSlots++;
+                
+                if (filledSlots === totalSlots) {
+                    handleLevelComplete();
+                }
+            } else {
+                // Incorrect match
+                this.classList.add('error');
+                showToast('Desinencia incorrecta', 'error');
+                setTimeout(() => {
+                    this.classList.remove('error');
+                }, 400);
+            }
+        }
+
+        function handleLevelComplete() {
+            const overlay = document.getElementById('dd-success-overlay');
+            overlay.classList.remove('hidden');
+            overlay.style.display = 'flex';
+            addXP(20);
+
+            // Check if all levels done (polites is the last one)
+            if (currentDDLevel === 'polites' && !state.achievements.dragDropCompleted) {
+                state.achievements.dragDropCompleted = true;
+                addXP(100);
+                showToast('¡Maestro de las Declinaciones! +100 XP Extra', 'success');
+                saveState();
+            }
+        }
+
+        function nextDragDropLevel() {
+            const select = document.getElementById('dd-selector');
+            const levels = ['art_masc', 'art_fem', 'art_neut', 'logos', 'nesos', 'rhodon', 'hemera', 'doxa', 'eirene', 'neanias', 'polites'];
+            let nextIndex = (levels.indexOf(currentDDLevel) + 1) % levels.length;
+            select.value = levels[nextIndex];
+            loadDragDropLevel(select.value);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            // Start at intro
+            navigate('theory-intro');
+        });
+
+    </script>
+</body>
+</html>
